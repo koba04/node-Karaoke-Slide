@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>曲名〜アーティスト〜</title>
+<meta charset="utf-8" />
+<link rel='stylesheet' href='css/lyrics.css' />
+<script src="js/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+<section></section>
+<script>
+jQuery(function($) {
+"use strict";
+  var sentences = [
+      { lyric: ['曲名 ', 'アーティスト'], class: "upper" },
+      { lyric: ['これは上に', '表示されます'], class: "upper" },
+      { lyric: ['これは下に', '表示されます'], class: "bottom" },
+    ],
+    extension = "JPG",
+    // case no use socket.io
+    socket = typeof io !== "undefined" ? io.connect('http://' + location.host) : { on: function(){}, emit: function(){} },
+    currentIndex = 0,
+    touchState = {
+      startX: 0,
+      startY: 0,
+      diffX: 0,
+      diffY: 0
+    },
+    // selector
+    $section = $('section').first(),
+    $sentence = $('<div />'),
+    $img = $('<img />'),
+    // function
+    movePage = function(page) {
+      var sentence = sentences[page];
+      $section.hide();
+      $section.empty();
+      $section.fadeIn("slow");
+      $sentence.attr("class", "lyric-" + sentence.class);
+      $sentence.html(sentence.lyric.join("<br />"));
+      $img.attr("src", "img/" + (sentence.img ? sentence.img : page + "." + extension) );
+      $section.append($img);
+      $section.append($sentence);
+    },
+    moveCurrentPage = function() {
+      movePage(currentIndex);
+  };
+
+  // sendMessage(evt)
+  $(window).bind("keydown", function(e) {
+    if ( e.which === 39 && currentIndex < sentences.length - 1 ) {
+      ++currentIndex;
+      moveCurrentPage();
+      socket.emit('move', currentIndex);
+    } else if ( e.which === 37 && currentIndex > 0 ) {
+      --currentIndex;
+      moveCurrentPage();
+      socket.emit('move', currentIndex);
+    }
+  });
+
+  // handle flick event
+  $section.bind("touchstart", function(e) {
+    var touch = e.originalEvent.touches[0];
+    touchState.startX = touch.pageX;
+    touchState.startY = touch.pageY;
+  });
+
+  $section.bind("touchmove", function(e) {
+    e.originalEvent.preventDefault();
+      var touch = e.originalEvent.touches[0];
+      touchState.diffX = touch.pageX - touchState.startX;
+      touchState.diffY = touch.pageY - touchState.startY;
+  });
+
+  $section.bind("touchend", function(e) {
+    // flick to right
+    if (touchState.diffX > 150 && currentIndex < sentences.length - 1 ) {
+      ++currentIndex;
+      moveCurrentPage();
+      socket.emit('move', currentIndex);
+    // flick to left
+    } else if (touchState.diffX < -150 && currentIndex > 0) {
+      --currentIndex;
+      moveCurrentPage();
+      socket.emit('move', currentIndex);
+    }
+  });
+
+  // receive event from socket.io
+  socket.on('move', function(index) {
+    movePage(index);
+    currentIndex = index;
+  });
+
+  // init
+  moveCurrentPage();
+});
+</script>
+</body>
+</html>

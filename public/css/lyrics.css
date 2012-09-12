@@ -1,0 +1,36 @@
+@media all{
+body{
+  margin:0;
+  padding:0;
+  background-color: #565051;
+  color:#fff;
+  font-family:"Meiryo","Verdana","Helvetica","Tahoma",sans-serif;
+  font-size:60px;
+}
+section {
+  margin:0;
+  padding:0;
+}
+section img {
+  width: 100%;
+  height: 100%;
+}
+div.lyric-bottom {
+  margin:0;
+  width: 100%;
+  background-color:#030d20;
+  position: absolute;
+  top: 70%;
+  padding-left: 20px;
+  opacity: 0.8;
+}
+div.lyric-upper {
+  margin:0;
+  width: 100%;
+  background-color:#030d20;
+  /*background-color: #565051; */
+  position: absolute;
+  top: 5%;
+  padding-left: 20px;
+  opacity: 0.8;
+}
